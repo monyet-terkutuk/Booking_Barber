@@ -92,7 +92,7 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // UPDATE - Update a payment method by ID
-router.put('/payment-method/:id', async (req, res, next) => {
+router.put('/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
         const { name } = req.body;
@@ -128,7 +128,7 @@ router.put('/payment-method/:id', async (req, res, next) => {
 });
 
 // DELETE - Delete a payment method by ID
-router.delete('/payment-method/:id', isAdmin, async (req, res, next) => {
+router.delete('/:id', isAdmin, async (req, res, next) => {
     try {
         const { id } = req.params;
 

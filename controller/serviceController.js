@@ -60,7 +60,7 @@ router.get('', async (req, res) => {
 });
 
 // READ - Get a specific service by ID
-router.get('/service/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const service = await Service.findById(id);
@@ -90,7 +90,7 @@ router.get('/service/:id', async (req, res) => {
 });
 
 // UPDATE - Update a service by ID
-router.put('/service/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { name, description, price } = req.body;
@@ -129,7 +129,7 @@ router.put('/service/:id', async (req, res) => {
 });
 
 // DELETE - Delete a service by ID
-router.delete('/service/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
