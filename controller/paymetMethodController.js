@@ -128,7 +128,7 @@ router.put('/:id', async (req, res, next) => {
 });
 
 // DELETE - Delete a payment method by ID
-router.delete('/:id', isAdmin, async (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
 
@@ -143,7 +143,7 @@ router.delete('/:id', isAdmin, async (req, res, next) => {
             });
         }
 
-        await paymentMethod.remove();
+        await paymentMethod.deleteOne();
 
         return res.status(200).json({
             code: 200,

@@ -144,7 +144,8 @@ router.delete('/:id', async (req, res) => {
             });
         }
 
-        await service.remove();
+        // Gunakan deleteOne karena remove tidak tersedia
+        await service.deleteOne();
 
         return res.status(200).json({
             code: 200,
