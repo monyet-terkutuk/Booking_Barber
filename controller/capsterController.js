@@ -196,6 +196,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
             email,
             address,
             spesialis, // ✅ tambahkan ini
+            schedule = {} // optional from request
         } = req.body;
 
         const capster = await Capster.findById(id);
@@ -215,7 +216,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
         if (email) capster.email = email;
         if (address) capster.address = address;
         if (spesialis) capster.spesialis = spesialis; // ✅ penting
-        if (req.body.schedule) capster.schedule = req.body.schedule;
+        if (schedule) capster.schedule = schedule;
 
 
         await capster.save();
