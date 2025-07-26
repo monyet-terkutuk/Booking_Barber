@@ -8,9 +8,13 @@ const serviceSchema = new Schema(
             required: true,
             unique: true,
         },
+        image: {
+            type: String,
+            required: false, // Assuming image is required, adjust as necessary
+        },
         description: {
             type: String,
-            required: true,
+            required: false,
         },
         price: {
             type: Number,

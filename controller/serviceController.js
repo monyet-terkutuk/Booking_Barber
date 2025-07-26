@@ -6,7 +6,7 @@ const { isAuthenticated, isAdmin } = require('../middleware/auth'); // Assuming 
 // CREATE - Create a new service
 router.post('', async (req, res) => {
     try {
-        const { name, description, price } = req.body;
+        const { name, image, description, price } = req.body;
 
         // Check if service already exists
         const existingService = await Service.findOne({ name });
@@ -20,7 +20,7 @@ router.post('', async (req, res) => {
             });
         }
 
-        const newService = new Service({ name, description, price });
+        const newService = new Service({ name, image, description, price });
         await newService.save();
 
         return res.status(201).json({
@@ -145,7 +145,7 @@ router.delete('/:id', async (req, res) => {
         }
 
         // Gunakan deleteOne karena remove tidak tersedia
-        await service.deleteOne();
+        await zz
 
         return res.status(200).json({
             code: 200,

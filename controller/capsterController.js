@@ -3,12 +3,25 @@ const Capster = require('../model/Capster');
 const router = express.Router();
 const { isAuthenticated, isAdmin } = require('../middleware/auth'); // Assuming you have authentication and authorization middleware
 
-// CREATE - Create a new capster
-router.post('', async (req, res, next) => {
-    try {
-        const { username, phone, description, avatar, email, address } = req.body;
 
-        const existingCapster = await Capster.findOne({ $or: [{ username }, { email }, { phone }] });
+router.post('', async (req, res) => {
+    try {
+        const {
+            username,
+            spesialis,
+            phone,
+            description,
+            avatar,
+            email,
+            address,
+            schedule = {} // optional from request
+        } = req.body;
+
+        // Cek apakah username, email, atau phone sudah digunakan
+        const existingCapster = await Capster.findOne({
+            $or: [{ username }, { email }, { phone }]
+        });
+
         if (existingCapster) {
             return res.status(400).json({
                 code: 400,
@@ -19,13 +32,32 @@ router.post('', async (req, res, next) => {
             });
         }
 
+        // Atur default schedule jika tidak dikirim
+        const defaultDay = {
+            is_active: false,
+            jam_kerja: '08:00 - 17:00',
+            jam_istirahat: '12:00 - 13:00'
+        };
+
+        const fullSchedule = {
+            senin: { ...defaultDay, ...schedule.senin },
+            selasa: { ...defaultDay, ...schedule.selasa },
+            rabu: { ...defaultDay, ...schedule.rabu },
+            kamis: { ...defaultDay, ...schedule.kamis },
+            jumat: { ...defaultDay, ...schedule.jumat },
+            sabtu: { ...defaultDay, ...schedule.sabtu },
+            minggu: { ...defaultDay, ...schedule.minggu },
+        };
+
         const newCapster = new Capster({
             username,
+            spesialis,
             phone,
             description,
             avatar,
             email,
             address,
+            schedule: fullSchedule
         });
 
         await newCapster.save();
@@ -45,6 +77,8 @@ router.post('', async (req, res, next) => {
         });
     }
 });
+
+
 
 // List capsters with filters and pagination
 router.post('/list', async (req, res, next) => {
@@ -151,28 +185,38 @@ router.get('/:id?', async (req, res, next) => {
 });
 
 // UPDATE - Update a capster by ID
-router.put('/capster/:id', isAuthenticated, async (req, res, next) => {
+router.put('/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, phone, description, avatar, email, address } = req.body;
+        const {
+            username,
+            phone,
+            description,
+            avatar,
+            email,
+            address,
+            spesialis, // ✅ tambahkan ini
+        } = req.body;
 
         const capster = await Capster.findById(id);
         if (!capster) {
             return res.status(404).json({
                 code: 404,
                 status: 'error',
-                data: {
-                    error: 'Capster not found',
-                },
+                data: { error: 'Capster not found' },
             });
         }
 
-        capster.username = username || capster.username;
-        capster.phone = phone || capster.phone;
-        capster.description = description || capster.description;
-        capster.avatar = avatar || capster.avatar;
-        capster.email = email || capster.email;
-        capster.address = address || capster.address;
+        // Perbarui field jika tersedia
+        if (username) capster.username = username;
+        if (phone) capster.phone = phone;
+        if (description) capster.description = description;
+        if (avatar) capster.avatar = avatar;
+        if (email) capster.email = email;
+        if (address) capster.address = address;
+        if (spesialis) capster.spesialis = spesialis; // ✅ penting
+        if (req.body.schedule) capster.schedule = req.body.schedule;
+
 
         await capster.save();
 
@@ -185,12 +229,11 @@ router.put('/capster/:id', isAuthenticated, async (req, res, next) => {
         return res.status(500).json({
             code: 500,
             status: 'error',
-            data: {
-                error: error.message,
-            },
+            data: { error: error.message },
         });
     }
 });
+
 
 // DELETE - Delete a capster by ID
 router.delete('/capster/:id', isAuthenticated, async (req, res, next) => {

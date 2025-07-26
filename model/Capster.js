@@ -13,6 +13,10 @@ const capsterSchema = new Schema(
             required: true,
             unique: true,
         },
+        spesialis: {
+            type: String,
+            required: true,
+        },
         description: {
             type: String,
             required: true,
@@ -23,6 +27,43 @@ const capsterSchema = new Schema(
         rating: {
             type: Number,
             default: 0,
+        },
+        schedule: {
+            senin: {
+                is_active: { type: Boolean, default: false },
+                jam_kerja: { type: String, default: '08:00 - 17:00' },
+                jam_istirahat: { type: String, default: '12:00 - 13:00' },
+            },
+            selasa: {
+                is_active: { type: Boolean, default: false },
+                jam_kerja: { type: String, default: '08:00 - 17:00' },
+                jam_istirahat: { type: String, default: '12:00 - 13:00' },
+            },
+            rabu: {
+                is_active: { type: Boolean, default: false },
+                jam_kerja: { type: String, default: '08:00 - 17:00' },
+                jam_istirahat: { type: String, default: '12:00 - 13:00' },
+            },
+            kamis: {
+                is_active: { type: Boolean, default: false },
+                jam_kerja: { type: String, default: '08:00 - 17:00' },
+                jam_istirahat: { type: String, default: '12:00 - 13:00' },
+            },
+            jumat: {
+                is_active: { type: Boolean, default: false },
+                jam_kerja: { type: String, default: '08:00 - 17:00' },
+                jam_istirahat: { type: String, default: '12:00 - 13:00' },
+            },
+            sabtu: {
+                is_active: { type: Boolean, default: false },
+                jam_kerja: { type: String, default: '08:00 - 17:00' },
+                jam_istirahat: { type: String, default: '12:00 - 13:00' },
+            },
+            minggu: {
+                is_active: { type: Boolean, default: false },
+                jam_kerja: { type: String, default: '08:00 - 17:00' },
+                jam_istirahat: { type: String, default: '12:00 - 13:00' },
+            },
         },
         email: {
             type: String,
