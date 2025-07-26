@@ -14,7 +14,8 @@ router.post('', async (req, res) => {
             avatar,
             email,
             address,
-            schedule = {} // optional from request
+            schedule = {}, // optional from request
+            album = [] // optional from request
         } = req.body;
 
         // Cek apakah username, email, atau phone sudah digunakan
@@ -57,7 +58,8 @@ router.post('', async (req, res) => {
             avatar,
             email,
             address,
-            schedule: fullSchedule
+            schedule: fullSchedule,
+            album
         });
 
         await newCapster.save();
@@ -196,7 +198,8 @@ router.put('/:id', isAuthenticated, async (req, res) => {
             email,
             address,
             spesialis, // ✅ tambahkan ini
-            schedule = {} // optional from request
+            schedule = {}, // optional from request
+            album = [] // optional from request
         } = req.body;
 
         const capster = await Capster.findById(id);
@@ -217,6 +220,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
         if (address) capster.address = address;
         if (spesialis) capster.spesialis = spesialis; // ✅ penting
         if (schedule) capster.schedule = schedule;
+        if (album) capster.album = album; // Update album if provided
 
 
         await capster.save();

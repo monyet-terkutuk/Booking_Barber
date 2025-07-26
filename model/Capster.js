@@ -73,8 +73,11 @@ const capsterSchema = new Schema(
         address: {
             type: String,
         },
+        album: {
+            type: [String], // Assuming album is an array of strings (URLs or paths to images)
+            default: [],
+        },
     },
     { timestamps: true },
 );
-
 module.exports = model('Capster', capsterSchema);
