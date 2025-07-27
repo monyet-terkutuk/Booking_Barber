@@ -160,7 +160,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE - Delete a transaction by ID
-router.delete('/transaction/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -194,5 +194,32 @@ router.delete('/transaction/:id', async (req, res) => {
         });
     }
 });
+
+// GET - List waktu booking berdasarkan capster
+router.get('/time/:capsterId', async (req, res) => {
+    try {
+        const { capsterId } = req.params;
+
+        const bookedTimes = await Transaction.find({
+            capster_id: capsterId,
+            status: { $in: ['Menunggu', 'Di Konfirmasi', 'Sedang Di Layani'] }
+        }).select('date hour -_id'); // hanya ambil field date & hour
+
+        return res.status(200).json({
+            code: 200,
+            status: 'success',
+            data: bookedTimes,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: 500,
+            status: 'error',
+            data: {
+                error: error.message,
+            },
+        });
+    }
+});
+
 
 module.exports = router;

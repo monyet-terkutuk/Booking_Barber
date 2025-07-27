@@ -28,4 +28,4 @@ const userAccountingSchema = new Schema(
   { timestamps: true },
 );
 
-module.exports = model('UserAccounting', userAccountingSchema);
+module.exports = model('User', userAccountingSchema);
