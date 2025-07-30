@@ -56,10 +56,10 @@ router.post('', async (req, res) => {
 router.get('', async (req, res) => {
     try {
         const transactions = await Transaction.find()
-            .sort({ createdAt: -1 }) // Urutkan berdasarkan tanggal dibuat DESC
+            .sort({ date: -1 }) // Urutkan berdasarkan tanggal dibuat DESC
             .populate('capster_id', 'username')
             .populate('payment_id', 'name')
-            .populate('service_id', 'name');
+            .populate('service_id', 'name price');
 
         return res.status(200).json({
             code: 200,
