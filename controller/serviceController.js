@@ -93,7 +93,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, price } = req.body;
+        const { name, description, price, image } = req.body;
 
         const service = await Service.findById(id);
         if (!service) {
@@ -109,6 +109,7 @@ router.put('/:id', async (req, res) => {
         service.name = name || service.name;
         service.description = description || service.description;
         service.price = price || service.price;
+        service.image = image || service.image; // Assuming image can be updated
 
         await service.save();
 

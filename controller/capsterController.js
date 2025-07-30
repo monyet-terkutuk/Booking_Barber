@@ -241,7 +241,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
 
 
 // DELETE - Delete a capster by ID
-router.delete('/capster/:id', isAuthenticated, async (req, res, next) => {
+router.delete('/:id', isAuthenticated, async (req, res, next) => {
     try {
         const { id } = req.params;
 

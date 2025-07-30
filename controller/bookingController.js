@@ -56,9 +56,10 @@ router.post('', async (req, res) => {
 router.get('', async (req, res) => {
     try {
         const transactions = await Transaction.find()
-            .populate('capster_id', 'username') // Populate capster name or other info as needed
-            .populate('payment_id', 'name') // Populate payment method name
-            .populate('service_id', 'name'); // Populate service name
+            .sort({ createdAt: -1 }) // Urutkan berdasarkan tanggal dibuat DESC
+            .populate('capster_id', 'username')
+            .populate('payment_id', 'name')
+            .populate('service_id', 'name');
 
         return res.status(200).json({
             code: 200,
@@ -175,7 +176,7 @@ router.delete('/:id', async (req, res) => {
             });
         }
 
-        await transaction.remove();
+        await transaction.deleteOne();
 
         return res.status(200).json({
             code: 200,
