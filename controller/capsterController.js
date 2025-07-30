@@ -256,7 +256,7 @@ router.delete('/:id', isAuthenticated, async (req, res, next) => {
             });
         }
 
-        await transaction.deleteOne();
+        await capster.deleteOne();
 
         return res.status(200).json({
             code: 200,
