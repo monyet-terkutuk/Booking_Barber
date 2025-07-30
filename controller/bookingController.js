@@ -94,6 +94,46 @@ router.get('/export', async (req, res) => {
             });
         });
 
+        // Spacer row
+        worksheet.addRow([]);
+
+        // === Ringkasan 1: Total Pendapatan per Metode Pembayaran ===
+        worksheet.addRow(['Metode Pembayaran', 'Total']);
+
+        const paymentTotals = {};
+        let totalPendapatan = 0;
+        transactions.forEach(trx => {
+            const paymentName = trx.payment_id?.name || 'Tanpa Metode';
+            const price = trx.service_id?.price || 0;
+            paymentTotals[paymentName] = (paymentTotals[paymentName] || 0) + price;
+            totalPendapatan += price;
+        });
+        for (const [method, total] of Object.entries(paymentTotals)) {
+            worksheet.addRow([method, total]);
+        }
+
+        // Spacer row
+        worksheet.addRow([]);
+
+        // === Ringkasan 2: Total Pendapatan Keseluruhan ===
+        worksheet.addRow(['Total Pendapatan', totalPendapatan]);
+
+        // Spacer row
+        worksheet.addRow([]);
+
+        // === Ringkasan 3: Total Customer per Capster ===
+        worksheet.addRow(['Capster', 'Total Customer']);
+
+        const capsterTotals = {};
+        transactions.forEach(trx => {
+            const capsterName = trx.capster_id?.username || 'Tanpa Capster';
+            capsterTotals[capsterName] = (capsterTotals[capsterName] || 0) + 1;
+        });
+        for (const [capster, total] of Object.entries(capsterTotals)) {
+            worksheet.addRow([capster, total]);
+        }
+
+
         // Set response headers untuk download Excel
         res.setHeader(
             'Content-Type',
