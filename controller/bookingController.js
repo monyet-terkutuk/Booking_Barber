@@ -55,7 +55,23 @@ router.post('', async (req, res) => {
 
 router.get('/export', async (req, res) => {
     try {
-        const transactions = await Transaction.find({ status: 'Selesai' })
+        const { start_date, end_date } = req.query;
+
+        // Build filter
+        const filter = { status: 'Selesai' };
+
+        if (start_date && end_date) {
+            filter.date = {
+                $gte: new Date(start_date),
+                $lte: new Date(end_date),
+            };
+        } else if (start_date) {
+            filter.date = { $gte: new Date(start_date) };
+        } else if (end_date) {
+            filter.date = { $lte: new Date(end_date) };
+        }
+
+        const transactions = await Transaction.find(filter)
             .sort({ date: -1 })
             .populate('capster_id', 'username')
             .populate('payment_id', 'name')
@@ -66,8 +82,8 @@ router.get('/export', async (req, res) => {
 
         // Header kolom
         worksheet.columns = [
+            { header: 'No', key: 'no', width: 25 },
             { header: 'Nama Customer', key: 'name', width: 20 },
-            { header: 'Email', key: 'email', width: 25 },
             { header: 'Telepon', key: 'phone', width: 15 },
             { header: 'Tanggal Booking', key: 'date', width: 20 },
             { header: 'Jam Booking', key: 'hour', width: 10 },
@@ -78,11 +94,14 @@ router.get('/export', async (req, res) => {
             { header: 'Status', key: 'status', width: 20 },
         ];
 
+        const paymentTotals = {};
+        let totalPendapatan = 0;
+
         // Isi baris data
         transactions.forEach((trx) => {
             worksheet.addRow({
+                no: transactions.indexOf(trx) + 1,
                 name: trx.name,
-                email: trx.email || '-',
                 phone: trx.phone,
                 date: trx.date.toISOString().split('T')[0],
                 hour: trx.hour,
@@ -92,37 +111,53 @@ router.get('/export', async (req, res) => {
                 price: trx.service_id?.price || 0,
                 status: trx.status,
             });
+
+            const paymentName = trx.payment_id?.name || 'Tanpa Metode';
+            const price = trx.service_id?.price || 0;
+
+            if (!paymentTotals[paymentName]) {
+                paymentTotals[paymentName] = {
+                    total: 0,
+                    count: 0
+                };
+            }
+
+            paymentTotals[paymentName].total += price;
+            paymentTotals[paymentName].count += 1;
+
+            totalPendapatan += price;
         });
 
         // Spacer row
         worksheet.addRow([]);
 
         // === Ringkasan 1: Total Pendapatan per Metode Pembayaran ===
-        worksheet.addRow(['Metode Pembayaran', 'Total']);
+        worksheet.addRow(['', 'Metode Pembayaran', 'Jumlah Transaksi', 'Total Harga']);
 
-        const paymentTotals = {};
-        let totalPendapatan = 0;
-        transactions.forEach(trx => {
-            const paymentName = trx.payment_id?.name || 'Tanpa Metode';
-            const price = trx.service_id?.price || 0;
-            paymentTotals[paymentName] = (paymentTotals[paymentName] || 0) + price;
-            totalPendapatan += price;
-        });
-        for (const [method, total] of Object.entries(paymentTotals)) {
-            worksheet.addRow([method, total]);
+        // Dua baris kosong
+        worksheet.addRow([]);
+        worksheet.addRow([]);
+
+        // Header untuk bagian rekap metode pembayaran
+        worksheet.addRow(['', 'Metode Pembayaran', 'Jumlah Transaksi', 'Total Pendapatan (Rp)']);
+
+        // Data rekap per metode pembayaran
+        for (const [method, data] of Object.entries(paymentTotals)) {
+            worksheet.addRow(['', method, data.count, data.total]);
         }
+
 
         // Spacer row
         worksheet.addRow([]);
 
         // === Ringkasan 2: Total Pendapatan Keseluruhan ===
-        worksheet.addRow(['Total Pendapatan', totalPendapatan]);
+        worksheet.addRow(['', 'Total Pendapatan', totalPendapatan]);
 
         // Spacer row
         worksheet.addRow([]);
 
         // === Ringkasan 3: Total Customer per Capster ===
-        worksheet.addRow(['Capster', 'Total Customer']);
+        worksheet.addRow(['', 'Capster', 'Total Customer']);
 
         const capsterTotals = {};
         transactions.forEach(trx => {
@@ -130,9 +165,8 @@ router.get('/export', async (req, res) => {
             capsterTotals[capsterName] = (capsterTotals[capsterName] || 0) + 1;
         });
         for (const [capster, total] of Object.entries(capsterTotals)) {
-            worksheet.addRow([capster, total]);
+            worksheet.addRow(['', capster, total]);
         }
-
 
         // Set response headers untuk download Excel
         res.setHeader(
@@ -160,8 +194,23 @@ router.get('/export', async (req, res) => {
 // READ - Get all bookings/transactions
 router.get('', async (req, res) => {
     try {
-        const transactions = await Transaction.find()
-            .sort({ date: -1 }) // Urutkan berdasarkan tanggal dibuat DESC
+        const { date_from, date_to } = req.query;
+        const filter = {};
+
+        // Tambahkan filter tanggal jika tersedia
+        if (date_from && date_to) {
+            filter.date = {
+                $gte: new Date(date_from),
+                $lte: new Date(date_to)
+            };
+        } else if (date_from) {
+            filter.date = { $gte: new Date(date_from) };
+        } else if (date_to) {
+            filter.date = { $lte: new Date(date_to) };
+        }
+
+        const transactions = await Transaction.find(filter)
+            .sort({ date: -1 })
             .populate('capster_id', 'username')
             .populate('payment_id', 'name')
             .populate('service_id', 'name price');
