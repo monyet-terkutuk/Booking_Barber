@@ -6,7 +6,7 @@ const User = require("../model/user");
 
 exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
   const token = req.headers.authorization;
-  console.log("ini token",token)
+  console.log("ini token", token)
   if (!token) {
     return next(new ErrorHandler("Please login to continue", 401));
   }
@@ -34,13 +34,3 @@ exports.isAdmin = (...roles) => {
   };
 };
 
-exports.isOfficer = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return next(
-        new ErrorHandler(`${req.user.role} can not access this resources!`)
-      );
-    }
-    next();
-  };
-};

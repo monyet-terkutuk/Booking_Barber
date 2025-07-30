@@ -1,6 +1,7 @@
 const express = require('express');
 const Transaction = require('../model/Booking'); // Assuming the model is stored in the model directory
 const router = express.Router();
+const ExcelJS = require('exceljs');
 
 // CREATE - Create a new booking/transaction
 router.post('', async (req, res) => {
@@ -48,6 +49,70 @@ router.post('', async (req, res) => {
             data: {
                 error: error.message,
             },
+        });
+    }
+});
+
+router.get('/export', async (req, res) => {
+    try {
+        const transactions = await Transaction.find({ status: 'Selesai' })
+            .sort({ date: -1 })
+            .populate('capster_id', 'username')
+            .populate('payment_id', 'name')
+            .populate('service_id', 'name price');
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Daftar Booking Selesai');
+
+        // Header kolom
+        worksheet.columns = [
+            { header: 'Nama Customer', key: 'name', width: 20 },
+            { header: 'Email', key: 'email', width: 25 },
+            { header: 'Telepon', key: 'phone', width: 15 },
+            { header: 'Tanggal Booking', key: 'date', width: 20 },
+            { header: 'Jam Booking', key: 'hour', width: 10 },
+            { header: 'Capster', key: 'capster', width: 20 },
+            { header: 'Metode Pembayaran', key: 'payment', width: 20 },
+            { header: 'Layanan', key: 'service', width: 25 },
+            { header: 'Harga', key: 'price', width: 15 },
+            { header: 'Status', key: 'status', width: 20 },
+        ];
+
+        // Isi baris data
+        transactions.forEach((trx) => {
+            worksheet.addRow({
+                name: trx.name,
+                email: trx.email || '-',
+                phone: trx.phone,
+                date: trx.date.toISOString().split('T')[0],
+                hour: trx.hour,
+                capster: trx.capster_id?.username || '-',
+                payment: trx.payment_id?.name || '-',
+                service: trx.service_id?.name || '-',
+                price: trx.service_id?.price || 0,
+                status: trx.status,
+            });
+        });
+
+        // Set response headers untuk download Excel
+        res.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename=booking_selesai.xlsx'
+        );
+
+        await workbook.xlsx.write(res);
+        res.status(200).end();
+    } catch (error) {
+        console.error('Export error:', error);
+        return res.status(500).json({
+            code: 500,
+            status: 'error',
+            message: 'Gagal mengekspor data',
+            error: error.message,
         });
     }
 });
