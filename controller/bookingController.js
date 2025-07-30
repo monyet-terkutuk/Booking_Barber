@@ -128,11 +128,11 @@ router.get('/export', async (req, res) => {
             totalPendapatan += price;
         });
 
-        // Spacer row
-        worksheet.addRow([]);
+        // // Spacer row
+        // worksheet.addRow([]);
 
-        // === Ringkasan 1: Total Pendapatan per Metode Pembayaran ===
-        worksheet.addRow(['', 'Metode Pembayaran', 'Jumlah Transaksi', 'Total Harga']);
+        // // === Ringkasan 1: Total Pendapatan per Metode Pembayaran ===
+        // worksheet.addRow(['', 'Metode Pembayaran', 'Jumlah Transaksi', 'Total Harga']);
 
         // Dua baris kosong
         worksheet.addRow([]);
